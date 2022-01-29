@@ -37,6 +37,16 @@ python missing-hanabi.py Donald
 
 ## How to install the script
 
+### Using the Binder web service
+
+Binder is a service that offers a hosted JupyterHub environment in your browser, allowing you to execute code without installing anything on your computer.  
+You can click on this button to access it :
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/N1trate/missing-hanabi/HEAD?labpath=binder.ipynb)
+
+You should then follow instructions found in the notebook to continue.
+
+### Installing locally
+
 * Linux: You should know what to do
 * Windows: I don't know what to do
 * Mac: I don't know why you do
