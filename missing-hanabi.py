@@ -65,7 +65,7 @@ def augment_players(players, add_players, remove_players, ignore_players):
     return players
 
 def get_missing(players):
-    r = requests.get(f"https://hanab.live/shared-missing-scores/{'/'.join(players)}")
+    r = requests.get(f"https://hanab.live/shared-missing-scores/{len(players)}/{'/'.join(players)}")
 
     soup = BeautifulSoup(r.text, features="html.parser")
     missings = []
