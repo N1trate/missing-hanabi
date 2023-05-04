@@ -14,8 +14,9 @@ def get_players():
     s = requests.Session()
     r = s.get("https://hanab.live/")
     for line in r.text.split('\n'):
-        if line.startswith("<script"):
-            info = re.search('<script type="text/javascript" src="/public/js/bundles/main.(\\d*).min.js"></script>', line)
+        #if line.startswith("<script"):
+        if line.lstrip().startswith("src="):
+            info = re.search('src="/public/js/bundles/main.(\\d*).min.js"', line)
             if info:
                 version = str(info.group(1))
     r = s.post('https://hanab.live/login', data={"username":config.username,"password":config.password,"version":version})
@@ -123,6 +124,10 @@ def main(add_players=[], remove_players=[], ignore_players=[]):
 
     print(f"Using {players}")
     missings = get_missing(players)
+    if config.WANTED_VARS:
+        for m,_ in missings:
+            if m in config.WANTED_VARS:
+                print("Wanted Variant!!!", m)
     filtered_missings = filter_missings(missings)
     
     # May be better to send that to the table owner instead of the player, but that's a start

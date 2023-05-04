@@ -17,6 +17,11 @@ password=""
 MIN_EFF=0
 MAX_EFF=1.24
 
+# Configure this array of element to hold any variant that you absolutely want to see
+# Those variant will show up even if the exclusion further down should hide them
+WANTED_VARS=[
+]
+
 # Configure this array of elements to hold any variant that you want to exclude
 # The code is going to skip any variant which contain any of these strings (case-insensitive)
 # You can add as many as you want as long as they are separated by a comma (,)
