@@ -132,14 +132,14 @@ def main(add_players=[], remove_players=[], ignore_players=[]):
     # May be better to send that to the table owner instead of the player, but that's a start
     # Also doesn't have to handle if the player isn't in a pre-game
     if type(config.SEND_PM) == int and config.SEND_PM != 0:
-        if config.RANDOM_VARIANTS and len(filtered_missing) > config.SEND_PM:
+        if config.RANDOM_VARIANTS and len(filtered_missings) > config.SEND_PM:
             selected_variants = random.sample(filtered_missings, config.SEND_PM)
         else:
             selected_variants = filtered_missings[:config.SEND_PM]
         send_pm(selected_variants, cookies)
 
     if type(config.PRINT_OPTIONS) == int and config.PRINT_OPTIONS != 0:
-        if config.RANDOM_VARIANTS and len(filtered_missing) > config.PRINT_OPTIONS:
+        if config.RANDOM_VARIANTS and len(filtered_missings) > config.PRINT_OPTIONS:
             selected_variants = random.sample(filtered_missings, config.PRINT_OPTIONS)
         else:
             selected_variants = filtered_missings[:config.PRINT_OPTIONS]
