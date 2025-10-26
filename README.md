@@ -1,68 +1,102 @@
-# Script to help find interesting missing variants
+# Missing Hanabi - Find Interesting Missing Variants
 
-## Read me first!
+This project provides tools to help you find missing Hanabi variants for you and your pregame partners on hanab.live.
+
+**Two options available:**
+- 🌐 **Chrome Extension** - Easy-to-use browser extension (recommended for most users)
+- 🐍 **Python Script** - Command-line tool with more advanced options, on the git branch named "python"
+
+## READ ME FIRST!
 
 You should **NEVER** run code taken randomly on the internet.  
 If you plan to run this code, you SHOULD read it all.  
 This code is not meant to harm you in any way and is published without any warranty that it will do what is expected.  
 If you're still interested: GL HF.
 
-## How to use the script
-Before running the script, you should go over the options listed in the file named config.py. The main options to modify are the "player", "username" and "password" options. If you do not have a secondary account to put in the "username" and "password" options, you will need to make one. I may include a default one at some point that we could all use. You should find documentation for the other options in the config.py file itself.  
-To execute the script, you can use the following command :
-```bash
-python missing-hanabi.py
-```
-This previous command is the way most users are going to use the script. For a few very special cases, the script also supports optional arguments. The optional arguments will modify who is going to be taken into consideration to find a missing variant. By default, the script is going to find your pre-game table and use your current table partners. If you are not in a pre-game, it will try to find one of your running or completed game to use as a base. If there are multiple, there is no way for you to choose which one it will use. The optional arguments follow three patterns :
-* +Username
-* Username
-* -Username  
+## Chrome Extension (Recommended)
 
-The first one (+ prefix) will add that user to the list of users that you are searching a variant for.  
-The second one (no prefix) will replace that user with a user that has played no game, effectively removing that player from consideration.  
-The third one (- prefix) will remove that user from the list.
+The Chrome extension provides an easy-to-use interface for finding missing variants directly on hanab.live.
 
-An example: Let's say that you (Alice) are in a review with Bob and Cathy. You know that Bob wants to leave, and Donald wants to join. Donald, a very experienced player, also told you that he is not score hunting and doesn't mind playing any variants. As you're reaching the end of the review, you can use the following to get the list of missing variants for the three of you, for the next game : 
-```bash 
-python missing-hanabi.py -Bob +Donald Donald
-```
-The ordering of the arguments is not important, so the following would do the same :
-```bash
-python missing-hanabi.py -Bob Donald +Donald
-```
-If you had waited for the pre-game lobby where you would be joined by Cathy and Donald, you could simply used the following :
-```bash
-python missing-hanabi.py Donald
-```
+### Installation
 
-## How to install the script
+1. Download or clone this repository
+2. Open Chrome and navigate to `chrome://extensions/` or click the three-dot menu → More Tools → Extensions
+3. In the top-right corner, toggle "Developer mode" ON
+4. Click "Load unpacked"
+5. Select the `missing-hanabi` directory from this repository
+6. The extension should now appear in your extensions list
 
-### Using the Binder web service
+### Usage
 
-Binder is a service that offers a hosted JupyterHub environment in your browser, allowing you to execute code without installing anything on your computer.  
-You can click on this button to access it :
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/N1trate/missing-hanabi/HEAD?labpath=binder.ipynb)
+1. Navigate to hanab.live and join a pregame lobby
+2. Click the option gear "⚙️" to open your preferences
+3. Configure your preferences (wanted/excluded variants, efficiency range, ...)
+4. Get variants in the panel, or click the "Find Missing Variant" button to refresh the list
+5. Clicking on an item will automatically update the table, either as a table leader or offering the variant to the table leader
 
-You should then follow instructions found in the notebook to continue.
+### Optional Settings
 
-### Installing locally
+- **Efficiency Range**: Minimum and maximum efficiency values (default: 0 to 1.4)
+- **Number to Display**: Amount of variant to limit the list to
+- **Randomize Variants**: Randomize the list before showing it in the panel
+- **Auto-Update**: Update the list when players are joining or leaving the pre-game lobby
+- **Hide Join/Spectate Buttons**: Remove the new button if your muscle memory is too strong
+- **Wanted Variants**: Variants you want to prioritize (one per line)
+  - These will be included even if they match exclusion rules
+  - These will be prioritize over giving random variants if randomization is selected
+  - Glob matching applies (e.g., "Pink" matches "Pink (5 Suits)" and "Omni & Gray Pink (5 Suits)")
+- **Excluded Variants**: Variants you want to filter out (one per line)
+  - Any variant containing these strings (case-insensitive) will be excluded
+  - Glob matching applies (e.g., "Pink" matches "Pink (5 Suits)" and "Omni & Gray Pink (5 Suits)")
+  - Default exclusions: Null, Omni, Blind, Mute, Clue Starved, Up or Down, Throw It in a Hole, Cow & Pig, Duck
 
-* Linux: You should know what to do
-* Windows: I don't know what to do
-* Mac: I don't know why you do
+## Tips & Tricks
 
-Jokes aside, everybody's computer and setup is going to be different, but you may be able to follow most of these steps to get it to work:
-* (Optional) Use a python environment manager. You may want to investigate venv, virtualenv or even conda. This is to separate the different installations and libraries that you could need in different projects.
-* Either clone/download the repository, or download the two important pieces : missing-hanabi.py and config.py. You could optionally download requirements.txt.
-* Install the required libraries (listed in requirements.txt) in your environment. If you have the file locally, you should be able to use the following : 
-    ```bash
-    pip install -r requirements.txt
-    ```
-* Configure your personal settings in the config.py file. Save the file afterward.
-* Execute the script as explained in a previous section.
+💡 **Glob Matching:** "Pink" will match "Pink (5 Suits)", "Pink (6 Suits)", "Dark Pink", "Omni & Gray Pink (5 Suits)" etc.
 
-P.S. On Linux, you can make the script executable (chmod +x) and add a link to it in /usr/local/bin or ~/.local/bin if it exists and part of your PATH (ln -s \<where-the-script-is> /usr/local/bin/missing). You should then be able to call `missing` from anywhere. Make sure you didn't already have a `missing` executable that was important.
+💡 **Wanted Override:** Variants in your "Wanted" list will show up even if they match exclusions
 
-## How to improve the script
+💡 **Efficiency Values:** 
+- 0.0 - 1.0: Easier variants
+- 1.0 - 1.33: Medium difficulty
+- 1.33+: Hard variants
 
-This script is still very experimental. You may help improving it by opening issues or creating pull requests. I do not guarantee any timely answer, but will appreciate your help and opinion.
+## Troubleshooting
+
+### ❌ "Not in a pregame lobby"
+- Make sure you're on hanab.live and have joined or created a pregame table
+- The pregame lobby should be visible on your screen
+
+### ❌ "Could not find players"
+- Verify you're in an active pregame lobby
+- Try refreshing the page and rejoining the pregame
+
+### ❌ "No variants match criteria"
+- Try adjusting your efficiency range
+- Review your excluded variants list - you may be filtering out too many variants
+- Check that your wanted variants are spelled correctly
+
+### ❌ Panel does not appear
+- Refresh the hanab.live page
+
+## Updating the Extension
+
+When you pull updates from the repository:
+
+1. Go to `chrome://extensions/`
+2. Find the "Missing Hanabi Variant Finder" extension
+3. Click the reload icon (circular arrow)
+4. Your settings will be preserved
+
+## Uninstalling
+
+1. Go to `chrome://extensions/`
+2. Find the "Missing Hanabi Variant Finder" extension
+3. Click "Remove"
+4. Confirm the removal
+
+Note: This will also delete your saved configuration.
+
+## How to improve the project
+
+This project is still experimental. You may help improve it by opening issues or creating pull requests. I do not guarantee any timely answer, but will appreciate your help and opinion.

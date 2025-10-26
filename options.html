@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Missing Hanabi - Options</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: #f5f5f5;
+    }
+    
+    h1 {
+      color: #333;
+      border-bottom: 2px solid #4CAF50;
+      padding-bottom: 10px;
+    }
+    
+    .section {
+      background-color: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #555;
+    }
+    
+    input[type="text"],
+    input[type="number"],
+    textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+    
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+      font-family: monospace;
+    }
+    
+    .efficiency-group {
+      display: flex;
+      gap: 20px;
+    }
+    
+    .efficiency-group .form-group {
+      flex: 1;
+    }
+    
+    button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    
+    button:hover {
+      background-color: #45a049;
+    }
+
+    .notification {
+      position: fixed;
+      bottom: 5%;
+      right: 5%;
+      font-weight: bold;
+      font-size: 20px;
+      z-index: 1000;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    
+    .notification.success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .notification.warning {
+      background-color: #f2f8d7;
+      color: #7a7c24;
+      border: 1px solid #f5b14c;
+    }
+
+    .notification.error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    
+    .help-text {
+      font-size: 12px;
+      color: #777;
+      margin-top: 5px;
+    }
+    
+    /* Table styles */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    
+    th {
+      background-color: #4CAF50;
+      color: white;
+      padding: 12px;
+      text-align: left;
+      font-weight: bold;
+      cursor: pointer;
+      user-select: none;
+    }
+    
+    th.sortable:hover {
+      background-color: #45a049;
+    }
+    
+    th.sorted-asc::after {
+      content: ' ▲';
+      font-size: 10px;
+    }
+    
+    th.sorted-desc::after {
+      content: ' ▼';
+      font-size: 10px;
+    }
+    
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #ddd;
+    }
+    
+    tbody tr:hover {
+      background-color: #f5f5f5;
+    }
+    
+    .variant-filter-cell {
+      font-weight: 500;
+      color: #333;
+    }
+    
+    .checkbox-cell {
+      text-align: center;
+      width: 100px;
+    }
+    
+    .checkbox-cell input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+    
+    .delete-btn {
+      background-color: white;
+      color: red;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 12px;
+      margin-left: 10px;
+    }
+    
+    .delete-btn:hover {
+      background-color: red;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <h1>Missing Hanabi Variant Finder - Configuration</h1>
+  
+  <div class="section">
+    <h2>Efficiency Range</h2>
+    <div class="efficiency-group">
+      <div class="form-group">
+        <label for="minEfficiency">Minimum Efficiency:</label>
+        <input type="number" id="minEfficiency" step="0.1" min="0" max="3" value="0">
+        <div class="help-text">Minimum efficiency value (0 to ~3)</div>
+      </div>
+      <div class="form-group">
+        <label for="maxEfficiency">Maximum Efficiency:</label>
+        <input type="number" id="maxEfficiency" step="0.1" min="0" max="3" value="1.4">
+        <div class="help-text">Maximum efficiency value (0 to ~3)</div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>Display Settings</h2>
+    <div class="form-group">
+      <label for="maxVariants">Number of Variants to Display:</label>
+      <input type="number" id="maxVariants" min="1" max="100" value="15">
+      <div class="help-text">How many variants to show in the results panel (default: 15)</div>
+    </div>
+    
+    <div class="form-group">
+      <label>
+        <input type="checkbox" id="randomizeVariants">
+        Randomize Variant Order
+      </label>
+      <div class="help-text">When enabled, variants will be shown in random order instead of the filtered order (default: Off)</div>
+    </div>
+    
+    <div class="form-group">
+      <label>
+        <input type="checkbox" id="autoUpdate" checked>
+        Auto-Update on Player Changes
+      </label>
+      <div class="help-text">Automatically update the variant list when players join or leave (default: On)</div>
+    </div>
+    
+    <div class="form-group">
+      <label>
+        <input type="checkbox" id="hideButtons">
+        Hide Join/Spectate Buttons
+      </label>
+      <div class="help-text">Remove the Join and Spectate buttons from the pregame page (default: Off)</div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>Variant Preferences</h2>
+    <div class="help-text" style="margin-bottom: 15px;">
+      Configure variant filters with their preferences. Wanted variants are prioritized, excluded variants are filtered out, and listed variants are tracked without filtering effect.
+    </div>
+    
+    <table id="variantsTable">
+      <thead>
+        <tr>
+          <th class="sortable" data-column="filter">Variant Filter</th>
+          <th class="sortable" data-column="wanted" style="text-align: center;">Wanted</th>
+          <th class="sortable" data-column="excluded" style="text-align: center;">Excluded</th>
+          <th style="padding: 0;"></th>
+        </tr>
+      </thead>
+      <tbody id="variantsTableBody">
+        <!-- Rows will be populated by JavaScript -->
+      </tbody>
+    </table>
+    
+    <div class="form-group" style="margin-top: 15px;">
+      <label for="newVariantFilter">Add New Variant Filter:</label>
+      <div style="display: flex; gap: 10px;">
+        <input type="text" id="newVariantFilter" placeholder="e.g., Pink, Brown, Null..." style="flex: 1;">
+        <button type="button" id="addVariantButton" style="width: auto; padding: 8px 20px;">Add</button>
+      </div>
+    </div>
+  </div>
+  
+  <script src="options.js"></script>
+</body>
+</html>
