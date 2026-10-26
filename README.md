@@ -32,8 +32,11 @@ The Chrome extension provides an easy-to-use interface for finding missing varia
 2. Click the option gear "⚙️" to open your preferences
 3. Configure your preferences (wanted/excluded variants, efficiency range, ...)
 4. Get variants in the panel, or click the "Find Missing Variant" button to refresh the list
-5. Clicking on an item will automatically update the table, either as a table leader or offering the variant to the table leader
+5. Clicking on an item will automatically update the table as a table leader or offer the variant to the table leader otherwise
 
+| Ordered variants                 | Randomized variants              |
+|:--------------------------------:|:--------------------------------:|
+|![](screenshots/NabExtension1.png)|![](screenshots/NabExtension2.png)|
 ### Optional Settings
 
 - **Efficiency Range**: Minimum and maximum efficiency values (default: 0 to 1.4)
@@ -49,6 +52,10 @@ The Chrome extension provides an easy-to-use interface for finding missing varia
   - Any variant containing these strings (case-insensitive) will be excluded
   - Glob matching applies (e.g., "Pink" matches "Pink (5 Suits)" and "Omni & Gray Pink (5 Suits)")
   - Default exclusions: Null, Omni, Blind, Mute, Clue Starved, Up or Down, Throw It in a Hole, Cow & Pig, Duck
+- **Exclude Players**: Not part of the configuration screen, but it is possible to disable certain players in the pre-game table to ignore them while searching for a suitable variant
+
+![](screenshots/NabExtension3.png)
+![](screenshots/NabExtension4.png)
 
 ## Tips & Tricks
 

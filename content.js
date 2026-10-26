@@ -11,11 +11,7 @@ async function getPlayersFromPregame() {
         // Look for the <p> element within each player entry
         const nameElement = playerElement.querySelector('p');
         if (nameElement) {
-          var name = nameElement.textContent.trim();
-          if (nameElement.querySelector('span').classList.contains("unShadow") && name.endsWith('🕵️')) {
-            // Remove the investigator emoji and trailing space
-            name = name.slice(0, -('🕵️'.length)).trim();
-          }
+          const name = getPlayerNameFromElement(nameElement);
           if (name) {
             players.push(name);
           }
@@ -48,9 +44,9 @@ async function getPlayersFromPregame() {
   }
 }
 
-async function getMissingVariants(players) {
+async function getMissingVariants(players, numPlayers) {
   try {
-    const url = `https://hanab.live/shared-missing-scores/${players.length}/${players.join('/')}`;
+    const url = `${window.location.origin}/shared-missing-scores/${numPlayers}/${players.join('/')}`;
     const response = await fetch(url);
     
     if (!response.ok) {
@@ -125,6 +121,84 @@ function filterVariants(missings, config) {
   
   // Prioritize wanted variants by putting them first
   return [...wantedFiltered, ...filtered];
+}
+
+const disabledPlayers = new Set();
+
+function getPlayerNameFromElement(nameElement) {
+  const nameContainer = nameElement.querySelector('strong') || nameElement;
+  var name = nameContainer.textContent.trim();
+  const span = nameContainer.querySelector('span');
+  if (span && span.classList.contains("unShadow") && name.endsWith('🕵️')) {
+    // Remove the investigator emoji and trailing space
+    name = name.slice(0, -('🕵️'.length)).trim();
+  }
+  return name;
+}
+
+function applyNameToggleStyle(nameElement, disable) {
+  const icon = nameElement.querySelector('.missing-hanabi-toggle');
+  if (icon) {
+    const glyph = disable ? '🚫' : '✅';
+    if (icon.textContent !== glyph) {
+      icon.textContent = glyph;
+    }
+    icon.style.color = disable ? '#f44336' : '#4CAF50';
+  }
+
+  const nameContainer = nameElement.querySelector('strong');
+  if (nameContainer) {
+    nameContainer.style.textDecoration = disable ? 'line-through' : '';
+    nameContainer.style.opacity = disable ? '0.5' : '';
+  }
+}
+
+function setupLobbyNameToggles() {
+  document.querySelectorAll('.lobby-pregame-player').forEach(playerElement => {
+    const nameElement = playerElement.querySelector('p');
+    if (!nameElement) {
+      return;
+    }
+
+    const name = getPlayerNameFromElement(nameElement);
+    if (!name) {
+      return;
+    }
+
+    if (!nameElement.querySelector('.missing-hanabi-toggle')) {
+      const icon = document.createElement('span');
+      icon.className = 'missing-hanabi-toggle';
+      icon.title = 'Click to exclude/include this player in the missing variant search';
+      icon.style.cssText = `
+        cursor: pointer;
+        margin-right: 0.3em;
+        font-size: 0.85em;
+      `;
+
+      icon.addEventListener('click', async (event) => {
+        event.stopPropagation();
+
+        const currentName = getPlayerNameFromElement(nameElement);
+        if (disabledPlayers.has(currentName)) {
+          disabledPlayers.delete(currentName);
+        } else {
+          disabledPlayers.add(currentName);
+        }
+
+        applyNameToggleStyle(nameElement, disabledPlayers.has(currentName));
+
+        const button = document.getElementById('missing-hanabi-button');
+        const resultsContainer = document.getElementById('missing-hanabi-results');
+        if (button && resultsContainer) {
+          await findAndDisplayVariants(button, resultsContainer);
+        }
+      });
+
+      nameElement.prepend(icon);
+    }
+
+    applyNameToggleStyle(nameElement, disabledPlayers.has(name));
+  });
 }
 
 // Create and add the right panel for displaying variants
@@ -256,9 +330,26 @@ async function findAndDisplayVariants(button, resultsContainer) {
       button.disabled = false;
       return;
     }
+
+    for (const disabled of disabledPlayers) {
+      if (!players.includes(disabled)) {
+        disabledPlayers.delete(disabled);
+      }
+    }
+
+    setupLobbyNameToggles();
+
+    const activePlayers = players.filter(p => !disabledPlayers.has(p));
+
+    if (activePlayers.length < 2) {
+      resultsContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: #f44336;">Need at least 2 active players</div>';
+      button.textContent = 'Find Missing Variant';
+      button.disabled = false;
+      return;
+    }
     
     // Fetch missing variants
-    const missings = await getMissingVariants(players);
+    const missings = await getMissingVariants(activePlayers, players.length);
     
     if (!missings || missings.length === 0) {
       resultsContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: #f44336;">No missing variants found</div>';
@@ -378,7 +469,7 @@ function sendVariantAndFocusChat(variantName) {
 }
 
 // Store references for auto-update
-let currentPlayerCount = 0;
+let currentPlayerList = '';
 let autoUpdateEnabled = true;
 
 // Check and hide buttons if configured
@@ -400,6 +491,8 @@ async function hideButtonsIfConfigured() {
 
 // Auto-update variants when players change
 async function checkForPlayerChanges() {
+  setupLobbyNameToggles();
+
   const resultsContainer = document.getElementById('missing-hanabi-results');
   if (resultsContainer.style.display === 'none') {
     return; // Panel is hidden, skip updates
@@ -412,14 +505,13 @@ async function checkForPlayerChanges() {
   }
   
   const players = await getPlayersFromPregame();
+  const newPlayerList = players ? players.join('/') : '';
+
+  if (newPlayerList !== currentPlayerList) {
+    currentPlayerList = newPlayerList;
   const newPlayerCount = players ? players.length : 0;
-  
-  // If player count changed
-  if (newPlayerCount !== currentPlayerCount) {
-    currentPlayerCount = newPlayerCount;
     
     const button = document.getElementById('missing-hanabi-button');
-    
     if (button && resultsContainer) {
       if (newPlayerCount < 2) {
         // Clear the list if less than 2 players
