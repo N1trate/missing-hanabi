@@ -126,30 +126,34 @@ function filterVariants(missings, config) {
 const disabledPlayers = new Set();
 
 function getPlayerNameFromElement(nameElement) {
+  // The name lives inside the <strong> wrapper; read from there so our
+  // toggle icon (prepended to the <p>) is not picked up as part of the name
   const nameContainer = nameElement.querySelector('strong') || nameElement;
   var name = nameContainer.textContent.trim();
   const span = nameContainer.querySelector('span');
-  if (span && span.classList.contains("unShadow") && name.endsWith('🕵️')) {
+  if (span && span.classList.contains('unShadow') && name.endsWith('🕵️')) {
     // Remove the investigator emoji and trailing space
     name = name.slice(0, -('🕵️'.length)).trim();
   }
   return name;
 }
 
-function applyNameToggleStyle(nameElement, disable) {
+function applyNameToggleStyle(nameElement, disabled) {
   const icon = nameElement.querySelector('.missing-hanabi-toggle');
   if (icon) {
-    const glyph = disable ? '🚫' : '✅';
+    const glyph = disabled ? '🚫' : '✅';
+    // Only touch the DOM on an actual change: this runs from the mutation
+    // observer, and rewriting the text node would retrigger it endlessly
     if (icon.textContent !== glyph) {
       icon.textContent = glyph;
     }
-    icon.style.color = disable ? '#f44336' : '#4CAF50';
+    icon.style.color = disabled ? '#f44336' : '#4CAF50';
   }
 
   const nameContainer = nameElement.querySelector('strong');
   if (nameContainer) {
-    nameContainer.style.textDecoration = disable ? 'line-through' : '';
-    nameContainer.style.opacity = disable ? '0.5' : '';
+    nameContainer.style.textDecoration = disabled ? 'line-through' : '';
+    nameContainer.style.opacity = disabled ? '0.5' : '';
   }
 }
 
@@ -176,6 +180,8 @@ function setupLobbyNameToggles() {
       `;
 
       icon.addEventListener('click', async (event) => {
+        // Keep the click away from the site's own handlers (e.g. the
+        // shadow/unshadow feature while spectating)
         event.stopPropagation();
 
         const currentName = getPlayerNameFromElement(nameElement);
@@ -184,7 +190,6 @@ function setupLobbyNameToggles() {
         } else {
           disabledPlayers.add(currentName);
         }
-
         applyNameToggleStyle(nameElement, disabledPlayers.has(currentName));
 
         const button = document.getElementById('missing-hanabi-button');
@@ -255,7 +260,7 @@ function createVariantPanel() {
     chrome.runtime.sendMessage("showOptions");
   });
   header.appendChild(configButton);
-  
+
   // Create the results container
   const resultsContainer = document.createElement('div');
   resultsContainer.id = 'missing-hanabi-results';
@@ -331,6 +336,7 @@ async function findAndDisplayVariants(button, resultsContainer) {
       return;
     }
 
+    // Forget disabled players that are no longer at the table
     for (const disabled of disabledPlayers) {
       if (!players.includes(disabled)) {
         disabledPlayers.delete(disabled);
@@ -491,6 +497,8 @@ async function hideButtonsIfConfigured() {
 
 // Auto-update variants when players change
 async function checkForPlayerChanges() {
+  // The site rebuilds each player box on every lobby update, wiping our
+  // click handlers and styling, so always reattach them first
   setupLobbyNameToggles();
 
   const resultsContainer = document.getElementById('missing-hanabi-results');
@@ -509,8 +517,8 @@ async function checkForPlayerChanges() {
 
   if (newPlayerList !== currentPlayerList) {
     currentPlayerList = newPlayerList;
-  const newPlayerCount = players ? players.length : 0;
-    
+    const newPlayerCount = players ? players.length : 0;
+
     const button = document.getElementById('missing-hanabi-button');
     if (button && resultsContainer) {
       if (newPlayerCount < 2) {
