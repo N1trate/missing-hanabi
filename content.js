@@ -227,6 +227,8 @@ function createVariantPanel() {
     border-radius: 8px;
     display: none;
     flex-direction: column;
+    overflow: hidden;
+    transition: height 0.18s ease-out;
     z-index: 1000;
     font-family: Arial, sans-serif;
     line-height: 1em;
@@ -235,18 +237,36 @@ function createVariantPanel() {
   // Create the header
   const header = document.createElement('div');
   header.style.cssText = `
+    box-sizing: border-box;
+    height: 44px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
     padding: 12px;
     background-color: #1a1a1a;
     border-bottom: 2px solid #444;
     border-radius: 6px 6px 0 0;
     text-align: center;
+    cursor: pointer;
+    transition: background-color 0.15s ease-out;
   `;
+  header.title = 'Collapse';
   header.innerHTML = '<strong style="color: #fff; font-size: 14px;">Missing Variants</strong>';
+  
+  header.addEventListener('mouseenter', () => {
+    header.style.backgroundColor = '#2a2a2a';
+  });
+
+  header.addEventListener('mouseleave', () => {
+    header.style.backgroundColor = '#1a1a1a';
+  });
 
   const configButton = document.createElement('button');
   configButton.textContent = '⚙️';
   configButton.style.cssText = `
-    background-color: #1a1a1a;
+    background-color: transparent;
     color: #fff
     border: none;
     cursor: pointer;
@@ -260,6 +280,31 @@ function createVariantPanel() {
     chrome.runtime.sendMessage("showOptions");
   });
   header.appendChild(configButton);
+
+  // Body wrapper for everything below the header. It keeps its natural
+  // height while the panel's height animates, so the shrinking panel clips
+  // the content from the bottom (a roll-up) instead of squashing it
+  const panelBody = document.createElement('div');
+  panelBody.style.cssText = `
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    height: calc(100vh - 80px - 44px);
+    transition: height 0.18s ease-out;
+  `;
+  
+  let collapsed = false;
+  header.addEventListener('click', () => {
+    collapsed = !collapsed;
+    panel.style.height = collapsed ? '44px' : 'calc(100vh - 80px)';
+    panelBody.style.opacity = collapsed ? '0' : '1';
+    header.title = collapsed ? 'Expand' : 'Collapse';
+  });
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    panel.style.transition = 'none';
+    panelBody.style.transition = 'none';
+  }
 
   // Create the results container
   const resultsContainer = document.createElement('div');
@@ -302,8 +347,9 @@ function createVariantPanel() {
   
   // Assemble the panel
   panel.appendChild(header);
-  panel.appendChild(resultsContainer);
-  panel.appendChild(button);
+  panelBody.appendChild(resultsContainer);
+  panelBody.appendChild(button);
+  panel.appendChild(panelBody);
   
   // Add to page
   document.body.appendChild(panel);
