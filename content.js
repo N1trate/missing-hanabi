@@ -243,12 +243,9 @@ function createVariantPanel() {
     display: flex;
     align-items: center;
     justify-content: center;
-    position: relative;
-    padding: 12px;
     background-color: #1a1a1a;
     border-bottom: 2px solid #444;
     border-radius: 6px 6px 0 0;
-    text-align: center;
     cursor: pointer;
     transition: background-color 0.15s ease-out;
   `;
@@ -267,8 +264,7 @@ function createVariantPanel() {
   configButton.textContent = '⚙️';
   configButton.style.cssText = `
     background-color: transparent;
-    color: #fff
-    border: none;
+    color: #fff;
     cursor: pointer;
     position: fixed;
     top: 71px;
@@ -290,7 +286,7 @@ function createVariantPanel() {
     flex-direction: column;
     flex-shrink: 0;
     height: calc(100vh - 80px - 44px);
-    transition: height 0.18s ease-out;
+    transition: opacity 0.18s ease-out;
   `;
   
   let collapsed = false;
