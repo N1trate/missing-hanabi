@@ -4,8 +4,8 @@ async function getPlayersFromPregame() {
     // Since we're on the pre-game page, we can directly find players
     const players = [];
     
-    // Method 1: Check for .lobby-pregame-player elements (the most direct method for pregame page)
-    const pregamePlayers = document.querySelectorAll('.lobby-pregame-player');
+    // Method 1: Check for the player boxes (the most direct method for pregame page)
+    const pregamePlayers = document.querySelectorAll('[id^="lobby-pregame-player-"]');
     if (pregamePlayers.length > 0) {
       pregamePlayers.forEach(playerElement => {
         // Look for the <p> element within each player entry
@@ -131,7 +131,7 @@ function getPlayerNameFromElement(nameElement) {
   const nameContainer = nameElement.querySelector('strong') || nameElement;
   var name = nameContainer.textContent.trim();
   const span = nameContainer.querySelector('span');
-  if (span && span.classList.contains('unShadow') && name.endsWith('🕵️')) {
+  if (span && span.className.includes('un-shadow') && name.endsWith('🕵️')) {
     // Remove the investigator emoji and trailing space
     name = name.slice(0, -('🕵️'.length)).trim();
   }
@@ -158,7 +158,7 @@ function applyNameToggleStyle(nameElement, disabled) {
 }
 
 function setupLobbyNameToggles() {
-  document.querySelectorAll('.lobby-pregame-player').forEach(playerElement => {
+  document.querySelectorAll('[id^="lobby-pregame-player-"]').forEach(playerElement => {
     const nameElement = playerElement.querySelector('p');
     if (!nameElement) {
       return;
@@ -524,16 +524,16 @@ let autoUpdateEnabled = true;
 async function hideButtonsIfConfigured() {
   const config = await chrome.storage.sync.get({ hideButtons: false });
   
-  if (config.hideButtons) {
-    const joinButton = document.getElementById('nav-buttons-pregame-join');
-    if (joinButton && joinButton.parentElement) {
-      joinButton.parentElement.remove();
-    }
-    
-    const spectateButton = document.getElementById('nav-buttons-pregame-spectate');
-    if (spectateButton && spectateButton.parentElement) {
-      spectateButton.parentElement.remove();
-    }
+  if (config.hideButtons && !document.getElementById('missing-hanabi-hide-buttons')) {
+    const style = document.createElement('style');
+    style.id = 'missing-hanabi-hide-buttons';
+    style.textContent = `
+      li:has(> #nav-buttons-pregame-join),
+      li:has(> #nav-buttons-pregame-spectate) {
+        display: none !important;
+      }
+    `;
+    document.head.appendChild(style);
   }
 }
 
@@ -614,19 +614,11 @@ const playerObserver = new MutationObserver(() => {
   checkForPlayerChanges();
 });
 
-// Start observing player list changes
-setTimeout(() => {
-  const playerContainer = document.querySelector('.lobby-pregame-players');
-  if (playerContainer) {
-    playerObserver.observe(playerContainer, {
-      childList: true,
-      subtree: true
-    });
-  }
-  
-  // Also check initially
-  checkForPlayerChanges();
-}, 1000);
+if (lobbydiv) {
+  playerObserver.observe(lobbydiv, { childList: true, subtree: true });
+}
+
+checkForPlayerChanges();
 
 const commandInjection = document.getElementById('chatCommandInjection');
 if (!commandInjection) {
