@@ -578,46 +578,40 @@ async function checkForPlayerChanges() {
 createVariantPanel();
 hideButtonsIfConfigured();
 
-const lobbydiv = document.getElementById('lobby-pregame');
-const lobbyCallback = (mutationList, observer) => {
-  for (const mutation of mutationList) {
-    if (mutation.type === "attributes") {
-      if (mutation.attributeName !== 'style') {
-        return;
-      }
+const lobbyRoot = document.getElementById('lobby');
 
-      var panel = document.getElementById('missing-hanabi-panel');
-      if (!panel) {
-        return;
-      }
-
-      if (lobbydiv.style.display === 'none') {
-        // Lobby is hidden, hide panel too
-        panel.style.display = 'none';
-        return;
-      }
-      // Lobby is visible, make panel visible too
-      panel.style.display = 'flex';
-    }
-  }
-};
-
-// Start observing the target node for configured mutations
-if (lobbydiv) {
-  // Create an observer instance linked to the callback function
-  const lobbyObserver = new MutationObserver(lobbyCallback);
-  lobbyObserver.observe(lobbydiv, { attributes: true, childList: false, subtree: false });
+function isPregameVisible() {
+  const pregameSection = document.getElementById('lobby-pregame');
+  return pregameSection !== null && pregameSection.offsetParent !== null;
 }
 
-// Watch for player changes specifically
-const playerObserver = new MutationObserver(() => {
-  checkForPlayerChanges();
+let panelShown = false;
+function updatePanelVisibility() {
+  const panel = document.getElementById('missing-hanabi-panel');
+  if (!panel) {
+    return;
+  }
+  panelShown = isPregameVisible();
+  panel.style.display = panelShown ? 'flex' : 'none';
+}
+
+const lobbyObserver = new MutationObserver(() => {
+  updatePanelVisibility();
+  if (panelShown) {
+    checkForPlayerChanges();
+  }
 });
 
-if (lobbydiv) {
-  playerObserver.observe(lobbydiv, { childList: true, subtree: true });
+if (lobbyRoot) {
+  lobbyObserver.observe(lobbyRoot, {
+    attributes: true,
+    attributeFilter: ['class'],
+    childList: true,
+    subtree: true
+  });
 }
 
+updatePanelVisibility();
 checkForPlayerChanges();
 
 const commandInjection = document.getElementById('chatCommandInjection');
