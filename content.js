@@ -44,9 +44,26 @@ async function getPlayersFromPregame() {
   }
 }
 
-async function getMissingVariants(players, numPlayers) {
+async function getMissingVariants(players, numPlayers, config) {
   try {
-    const url = `${window.location.origin}/shared-missing-scores/${numPlayers}/${players.join('/')}`;
+    // Reduce the load and data being received by sending filters that can be applied 
+    // server-side. This should help speed up the response, and processing of it.
+    const params = new URLSearchParams();
+    if (config) {
+      if (config.minEfficiency > 0) {
+        params.set('minEfficiency', config.minEfficiency);
+      }
+      if (Number.isFinite(config.maxEfficiency)) {
+        params.set('maxEfficiency', config.maxEfficiency);
+      }
+      // Wanted variants bypass exclusions, so the exclusions may
+      // only be applied server-side if there are no wanted variants.
+      if (config.excludedVariants.length > 0 && config.wantedVariants.length === 0) {
+        params.set('excludeVariants', config.excludedVariants.join(','));
+      }
+    }
+    const query = params.toString();
+    const url = `${window.location.origin}/shared-missing-scores/${numPlayers}/${players.join('/')}${query ? `?${query}` : ''}`;
     const response = await fetch(url);
     
     if (!response.ok) {
@@ -397,7 +414,7 @@ async function findAndDisplayVariants(button, resultsContainer) {
     }
     
     // Fetch missing variants
-    const missings = await getMissingVariants(activePlayers, players.length);
+    const missings = await getMissingVariants(activePlayers, players.length, config);
     
     if (!missings || missings.length === 0) {
       resultsContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: #f44336;">No missing variants found</div>';
