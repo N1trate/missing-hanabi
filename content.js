@@ -72,23 +72,22 @@ async function getMissingVariants(players, numPlayers, config) {
     
     const html = await response.text();
     
-    // Parse the HTML to extract variants
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
-    const rows = doc.querySelectorAll('tr.missing-scores-row');
+    const tableData = doc.getElementById('public-page-table');
+    if (!tableData || !tableData.dataset.table) {
+      throw new Error('The page carries no missing-scores data');
+    }
     
     const missings = [];
-    rows.forEach(row => {
-      const cells = Array.from(row.children).map(cell => cell.textContent.trim()).filter(text => text);
-      if (cells.length >= 2) {
-        const variantName = cells[0];
-        const efficiency = parseFloat(cells[cells.length - 1]);
-        if (variantName && !isNaN(efficiency)) {
-          missings.push([variantName, efficiency]);
-        }
+    const table = JSON.parse(tableData.dataset.table);
+    (table.rows || []).forEach(row => {
+      const efficiency = parseFloat(row.efficiency);
+      if (row.variantName && !isNaN(efficiency)) {
+        missings.push([row.variantName, efficiency]);
       }
     });
-    
+
     return missings;
   } catch (error) {
     console.error('Error fetching missing variants:', error);
