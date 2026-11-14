@@ -526,10 +526,15 @@ function displayVariantList(container, variants) {
 // Send the variant command to the chat
 function sendVariantAndFocusChat(variantName) {
   const pregameInput = document.getElementById('lobby-chat-pregame-input');
-  if (pregameInput) {
-    window.postMessage({ type: 'chatCommandInjection', payload: variantName}, '*');
-    pregameInput.focus();
+  if (!pregameInput) {
+    return;
   }
+  const seated = document.querySelector('[id^="lobby-pregame-player-"] [class*="text-name-me"]') !== null;
+  const draft = pregameInput.value;
+  pregameInput.value = seated ? `/sv ${variantName}` : `@/sv ${variantName}@`;
+  pregameInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+  pregameInput.value = draft;
+  pregameInput.focus();
 }
 
 // Store references for auto-update
@@ -629,13 +634,3 @@ if (lobbyRoot) {
 
 updatePanelVisibility();
 checkForPlayerChanges();
-
-const commandInjection = document.getElementById('chatCommandInjection');
-if (!commandInjection) {
-    var node = document.getElementsByTagName('body')[0];
-    var script = document.createElement('script');
-    script.setAttribute('id', 'chatCommandInjection');
-    script.setAttribute('type', 'text/javascript');
-    script.setAttribute('src', chrome.runtime.getURL('chatCommandInjection.js'));
-    node.appendChild(script);
-}
