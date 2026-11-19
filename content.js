@@ -144,7 +144,16 @@ const disabledPlayers = new Set();
 function getPlayerNameFromElement(nameElement) {
   // The name lives inside the <strong> wrapper; read from there so our
   // toggle icon (prepended to the <p>) is not picked up as part of the name
-  const nameContainer = nameElement.querySelector('strong') || nameElement;
+  let nameContainer = nameElement.querySelector('strong') || nameElement;
+  // The site's FitText component renders the name twice: a hidden
+  // aria-hidden copy that only measures the full size, plus the shown copy.
+  // Read from a clone with the hidden copies stripped, or the name doubles
+  if (nameContainer.querySelector('[aria-hidden="true"]')) {
+    nameContainer = nameContainer.cloneNode(true);
+    nameContainer.querySelectorAll('[aria-hidden="true"]').forEach((el) => {
+      el.remove()
+    });
+  }
   var name = nameContainer.textContent.trim();
   const span = nameContainer.querySelector('span');
   if (span && span.className.includes('un-shadow') && name.endsWith('🕵️')) {
